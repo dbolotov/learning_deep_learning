@@ -1,7 +1,7 @@
 """
 sparse autoencoder class
 
-python implementation of autoencoder described here: 
+This is a python implementation of the autoencoder described here: 
 http://ufldl.stanford.edu/wiki/index.php/Exercise:Sparse_Autoencoder
 """
 
@@ -9,15 +9,16 @@ import numpy as np
 
 class sparseae(object):
 
-	def __init__(self):
+	def __init__(self, visibleSize=8*8, hiddenSize = 25, 
+					sparsityParam = 0.01, lam = 0.0001, beta = 3):
 		"""
 		initialize default ae params
 		"""
-		self.visibleSize = 8*8;		# number of input units 
-		self.hiddenSize = 25;		# number of hidden units 
-		self.sparsityParam = 0.01;	# desired average activation of the hidden units.
-		self.lam = 0.0001			# weight decay parameter       
-		self.beta = 3				#weight of sparsity penalty term       
+		self.visibleSize = visibleSize		# number of input units 
+		self.hiddenSize = hiddenSize		# number of hidden units 
+		self.sparsityParam = sparsityParam	# desired average activation of the hidden units.
+		self.lam = lam						# weight decay parameter       
+		self.beta = beta					# weight of sparsity penalty term       
 
 
 	def initNParams(self):
@@ -40,7 +41,7 @@ class sparseae(object):
 		"""
 		pass
 
-	def computeCost(self):
+	def __computeCost(self,patches):
 		"""
 		compute cost of single pass
 		"""
