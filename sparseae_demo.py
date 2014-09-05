@@ -1,9 +1,9 @@
 from sparseae import *
 import scipy.io
 import numpy as np
+import matplotlib.pyplot as plt
 
-
-def sample_images(numpatches=10,patchsize=8):
+def sample_images(numpatches=64,patchsize=8):
 	"""
 	sample random patches from .mat file
 	"""
@@ -41,8 +41,32 @@ def normalize_data(patches):
 
 	return patches
 
+def display_network(arr,numtoshow=64,patchsize=8):
+	"""
+	display some patches
+	"""
+
+	numtoshow = np.minimum(64,numtoshow)
+	plotsize = np.sqrt(numtoshow).astype(int)
+
+	f,axes = plt.subplots(nrows=plotsize,ncols=plotsize)
+
+	i = 0
+	for axis in axes.flat:
+		img = axis.imshow(arr[:,i].reshape(patchsize,patchsize),
+			cmap = plt.cm.gray, interpolation = 'nearest')
+
+		axis.set_frame_on(False)
+		axis.set_axis_off()
+		i += 1
+
+	plt.show()
 
 
 
 # s = sparseae() #initialize with default settings
 # s.initNParams()
+
+a = sample_images()
+
+display_network(a)
