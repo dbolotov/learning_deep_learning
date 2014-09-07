@@ -67,15 +67,15 @@ def display_network(arr,numtoshow=64,patchsize=8):
 # s = sparseae() #initialize with default settings
 # s.initNParams()
 
-a = sample_images()
+patches = sample_images()
 
 # display_network(a)
 
-a = normalize_data(a)
+patches = normalize_data(patches)
 
 # display_network(a)
 
 s = sparseae() #initialize with default settings
 s.initNParams()
 
-s.train()
+s.train(patches)
