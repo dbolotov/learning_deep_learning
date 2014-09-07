@@ -35,11 +35,11 @@ class sparseae(object):
 
 		self.theta = np.hstack((self.W1.flatten(),self.W2.flatten(),self.b1.flatten(),self.b2.flatten()))
 
-	def train(self):
+	def train(self,patches):
 		"""
 		train the ae
 		"""
-		# self.computeCost(self.theta)
+		self.computeCost(self.theta,patches)
 
 	def computeCost(self,theta,data):
 		"""
@@ -47,8 +47,8 @@ class sparseae(object):
 		"""
 		W1 = theta[0:self.hSize*self.vSize].reshape(self.hSize,self.vSize)
 		W2 = theta[self.hSize*self.vSize:2*self.hSize*self.vSize].reshape(self.vSize,self.hSize)
-		b1 = theta[2*self.hSize*self.vSize:2*self.hSize*self.vSize+self.hSize]
-		b2 = theta[2*self.hSize*self.vSize+self.hSize:]
+		b1 = theta[2*self.hSize*self.vSize:2*self.hSize*self.vSize+self.hSize].reshape(self.hSize,1)
+		b2 = theta[2*self.hSize*self.vSize+self.hSize:].reshape(self.vSize,1)
 
 		# print W1.shape, W2.shape, b1.shape, b2.shape
 
@@ -59,7 +59,46 @@ class sparseae(object):
 		b1grad = np.zeros(b1.shape)
 		b2grad = np.zeros(b2.shape)
 
+		m = data.shape[1]
+
+		# print data.shape
+		# print W1.shape
+		# print b1.shape
+
+		z_2 = np.dot(W1,data) + b1
+		a_2 = self.__sigmoid(z_2)
+
+		rho_hat = np.sum(a_2,1) * 1.0 / m 
+
+		z_3 = np.dot(W2,a_2) + b2
+		a_3 = self.__sigmoid(z_3)
+
+		diff = a_3 - data
+
+		sparse_penalty = self.__kl(self.sparsityParam, rho_hat)
+
+		J_simple = sum(sum(diff ** 2))*1.0 / (2*m)
+
+		reg = sum(W1.flatten() ** 2) + sum(W2.flatten() ** 2)*1.0
+
+
+		cost = J_simple + self.beta * sparse_penalty + self.lam * reg/2
+
+		print cost
+
+
 
 
 	def __sigmoid(self,z):
 		return 1.0 / (1.0 + np.exp(-z))
+
+	def __kl(self,r,rh):
+
+		return np.sum(r * np.log(r*1.0/rh) + (1-r) * np.log((1-r)/(1-rh)))
+
+
+
+
+# function ans = kl(r, rh)
+#   ans = sum(r .* log(r ./ rh) + (1-r) .* log( (1-r) ./ (1-rh)));
+# end
