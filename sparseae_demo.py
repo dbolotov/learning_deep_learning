@@ -24,7 +24,7 @@ def sample_images(numpatches=64,patchsize=8):
 		sample = images[x:x+patchsize, y:y+patchsize,z]
 		patches[:,i] = sample.flatten()
 
-	return normalize_data(patches)
+	return patches
 
 def normalize_data(patches):
 	"""
@@ -69,4 +69,13 @@ def display_network(arr,numtoshow=64,patchsize=8):
 
 a = sample_images()
 
-display_network(a)
+# display_network(a)
+
+a = normalize_data(a)
+
+# display_network(a)
+
+s = sparseae() #initialize with default settings
+s.initNParams()
+
+s.train()
