@@ -1,3 +1,4 @@
 *.pyc
 IMAGES.mat
 iterate.dat
+.ipynb_checkpoints/
