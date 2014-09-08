@@ -3,7 +3,7 @@ import scipy.io
 import numpy as np
 import matplotlib.pyplot as plt
 
-def sample_images(numpatches=10,patchsize=8):
+def sample_images(numpatches=10000,patchsize=8):
 	"""
 	sample random patches from .mat file
 	"""
@@ -72,6 +72,24 @@ def display_network(arr,numtoshow=64,patchsize=8):
 
 	plt.show()
 
+
+def display_weights(arr, vis_patch_side=8, hid_patch_side=5):
+	"""
+	display the trained weights
+	"""
+	figure, axes = plt.subplots(nrows = hid_patch_side, ncols = hid_patch_side)
+	index = 0
+
+	for axis in axes.flat:
+		image = axis.imshow(arr[index, :].reshape(vis_patch_side, vis_patch_side),cmap = plt.cm.gray, interpolation = 'nearest')
+
+
+		axis.set_frame_on(False)
+		axis.set_axis_off()
+		index += 1
+
+	plt.show()
+
 def computeNumericalGradient(J,theta):
 
 	numgrad = np.zeros(theta.shape)
@@ -119,10 +137,21 @@ def checkNumericalGradient():
 patches = sample_images()
 patches = normalize_data(patches)
 
+# display_network(patches)
+
 s = sparseae() #initialize with default settings
 s.initNParams()
 
-s.train(patches)
+weights = s.train(patches)
+
+# print weights.shape
+
+# print s.vSize,s.hSize
+
+display_weights(arr = weights)
+
+print patches.shape
+
 
 
 # print 'check cost calculation against numerical gradient'

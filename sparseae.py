@@ -57,8 +57,15 @@ class sparseae(object):
 		# opt_theta = opt_solution.x
 		# opt_W1 = opt_theta[encoder.limit0 : encoder.limit1].reshape(hidden_size, visible_size)
 
-		nn_params, cost, _, _, _ = op.fmin_cg(lambda t: self.computeCost(t,patches),self.theta, gtol = 0.001, maxiter = 40, full_output=1)
+		# nn_params, cost, _, _, _ = op.fmin_cg(lambda t: self.computeCost(t,patches),self.theta, gtol = 0.001, maxiter = 40, full_output=1)
 
+		x,f,d = op.fmin_l_bfgs_b(lambda t: self.computeCost(t,patches), x0 = self.theta, pgtol = 0.00001, disp=1)
+		# print x.shape
+		# print f
+		# print d['grad'].shape
+		W1 = x[: self.hSize*self.vSize].reshape(self.hSize, self.vSize)
+
+		return W1
 
 
 	def computeCost(self,theta,data):
