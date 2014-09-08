@@ -16,6 +16,6 @@ TODO:
 - clean up and comment code
 - create ipython notebook demo
 - check display_network output against MATLAB code
-
+- add display function for the original images (not patches)
 
 
