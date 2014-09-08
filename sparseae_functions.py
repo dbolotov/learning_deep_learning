@@ -44,7 +44,6 @@ def normalize_data(patches):
 	patches = patches - np.mean(patches,0) #remove DC
 
 	pstd = 3 * np.std(patches.flatten(),ddof=1)
-
 	patches = np.maximum(np.minimum(patches,pstd), -pstd) * 1.0 / pstd #truncate to +/-3 standard deviations and scale to -1 to 1
 
 	patches = (patches + 1) * 0.4 + 0.1; #rescale from [-1, 1] to [0.1, 0.9]
@@ -73,20 +72,19 @@ def display_network(arr,numtoshow=64,patchsize=8):
 	plt.show()
 
 
-def display_weights(arr, vis_patch_side=8, hid_patch_side=5):
+def display_weights(arr, vSide=8, hSide=5):
 	"""
 	display the trained weights
 	"""
-	figure, axes = plt.subplots(nrows = hid_patch_side, ncols = hid_patch_side)
-	index = 0
+	figure, axes = plt.subplots(nrows = hSide, ncols = hSide)
+	i = 0
 
 	for axis in axes.flat:
-		image = axis.imshow(arr[index, :].reshape(vis_patch_side, vis_patch_side),cmap = plt.cm.gray, interpolation = 'nearest')
-
+		image = axis.imshow(arr[i, :].reshape(vSide, vSide),cmap = plt.cm.gray, interpolation = 'nearest')
 
 		axis.set_frame_on(False)
 		axis.set_axis_off()
-		index += 1
+		i += 1
 
 	plt.show()
 
@@ -133,24 +131,21 @@ def checkNumericalGradient():
 
 
 
+# Demonstration
 
 patches = sample_images()
 patches = normalize_data(patches)
 
 # display_network(patches)
 
-s = sparseae() #initialize with default settings
-s.initNParams()
+# sae = sparseae() #initialize autoencoder with default settings
 
-weights = s.train(patches)
+sae = sparseae(hSide = 6) #initialize autoencoder with 36 hidden units
 
-# print weights.shape
+weights = sae.train(patches) #train the network
 
-# print s.vSize,s.hSize
+display_weights(arr = weights, vSide = sae.vSide, hSide = sae.hSide)
 
-display_weights(arr = weights)
-
-print patches.shape
 
 
 
