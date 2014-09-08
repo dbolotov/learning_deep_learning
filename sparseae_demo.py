@@ -3,7 +3,7 @@ import scipy.io
 import numpy as np
 import matplotlib.pyplot as plt
 
-def sample_images(numpatches=64,patchsize=8):
+def sample_images(numpatches=10,patchsize=8):
 	"""
 	sample random patches from .mat file
 	"""
@@ -16,6 +16,7 @@ def sample_images(numpatches=64,patchsize=8):
 
 	patches = np.zeros([patchsize ** 2, numpatches])
 
+	#random selection
 	for i in xrange(numpatches):
 		x = np.random.randint(imageside-patchsize)
 		y = np.random.randint(imageside-patchsize)
@@ -23,6 +24,15 @@ def sample_images(numpatches=64,patchsize=8):
 
 		sample = images[x:x+patchsize, y:y+patchsize,z]
 		patches[:,i] = sample.flatten()
+
+	# #non-random selection
+	# for i in xrange(numpatches):
+	# 	x = i
+	# 	y = i
+	# 	z = i
+
+	# 	sample = images[x:x+patchsize, y:y+patchsize,z]
+	# 	patches[:,i] = sample.flatten(1)
 
 	return patches
 
@@ -66,20 +76,15 @@ def computeNumericalGradient(J,theta):
 
 	numgrad = np.zeros(theta.shape)
 
-
 	eps = 1e-4
 	n = numgrad.shape[0]
 	i = np.eye(n,n)
 
 	for k in xrange(numgrad.shape[0]):
 		eps_vec = i[:,k] * eps
-		eps_vec = eps_vec.reshape(eps_vec.shape[0],1)
 
 		val = (J(theta+eps_vec)[0] - J(theta-eps_vec)[0]) * 1.0 / (2*eps)
 
-		# print 'val:'
-		# print val
-		# print '---'
 		numgrad[k] = val
 
 	return numgrad
@@ -97,7 +102,7 @@ def checkNumericalGradient():
 	x = np.array([[4],[10]])
 	value,grad = simpleQuadraticFunction(x)
 
-	numgrad = computeNumericalGradient(simpleQuadraticFunction, x);
+	numgrad = computeNumericalGradient(lambda x: simpleQuadraticFunction(x), x);
 
 	print 'sizes: numgrad, grad:', numgrad.shape, grad.shape
 
@@ -111,32 +116,24 @@ def checkNumericalGradient():
 
 
 
-
-
-
-
-
-
-
-
-
-# s = sparseae() #initialize with default settings
-# s.initNParams()
-
 patches = sample_images()
-
-# display_network(a)
-
 patches = normalize_data(patches)
 
-# display_network(a)
-
 s = sparseae() #initialize with default settings
-
-
 s.initNParams()
 
-s.train(patches)
 
-checkNumericalGradient()
+print 'check cost calculation against numerical gradient'
+[cost,grad] = s.computeCost(s.theta,patches)
+
+numgrad = computeNumericalGradient(lambda x: s.computeCost(x,patches),s.theta)
+
+diff = np.abs(numgrad-grad) / np.abs(numgrad+grad)
+
+print 'these value should be less than 1e-9:'
+print 'max:',np.max(diff)
+print 'min:',np.min(diff)
+
+# # print np.hstack((numgrad,grad))
+
 
