@@ -122,17 +122,19 @@ patches = normalize_data(patches)
 s = sparseae() #initialize with default settings
 s.initNParams()
 
+s.train(patches)
 
-print 'check cost calculation against numerical gradient'
-[cost,grad] = s.computeCost(s.theta,patches)
 
-numgrad = computeNumericalGradient(lambda x: s.computeCost(x,patches),s.theta)
+# print 'check cost calculation against numerical gradient'
+# [cost,grad] = s.computeCost(s.theta,patches)
 
-diff = np.abs(numgrad-grad) / np.abs(numgrad+grad)
+# numgrad = computeNumericalGradient(lambda x: s.computeCost(x,patches),s.theta)
 
-print 'these value should be less than 1e-9:'
-print 'max:',np.max(diff)
-print 'min:',np.min(diff)
+# diff = np.abs(numgrad-grad) / np.abs(numgrad+grad)
+
+# print 'these value should be less than 1e-9:'
+# print 'max:',np.max(diff)
+# print 'min:',np.min(diff)
 
 # # print np.hstack((numgrad,grad))
 

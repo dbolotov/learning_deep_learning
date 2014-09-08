@@ -6,6 +6,7 @@ http://ufldl.stanford.edu/wiki/index.php/Exercise:Sparse_Autoencoder
 """
 
 import numpy as np
+import scipy.optimize as op
 
 class sparseae(object):
 
@@ -47,7 +48,18 @@ class sparseae(object):
 		"""
 		train the ae
 		"""
-		cost,grad = self.computeCost(self.theta,patches)
+
+		max_iterations = 40
+
+		# opt_solution = scipy.optimize.minimize(self.computeCost, self.theta, 
+		# 		args = (patches,), method = 'L-BFGS-B',jac = True, options = {'maxiter': max_iterations})
+
+		# opt_theta = opt_solution.x
+		# opt_W1 = opt_theta[encoder.limit0 : encoder.limit1].reshape(hidden_size, visible_size)
+
+		nn_params, cost, _, _, _ = op.fmin_cg(lambda t: self.computeCost(t,patches),self.theta, gtol = 0.001, maxiter = 40, full_output=1)
+
+
 
 	def computeCost(self,theta,data):
 		"""
