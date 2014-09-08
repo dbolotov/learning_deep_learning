@@ -10,22 +10,20 @@ import scipy.optimize as op
 
 class sparseae(object):
 
-	def __init__(self, vSize=8*8, hSize = 25, 
+	def __init__(self, vSide=8, hSide = 5, 
 					sparsityParam = 0.01, lam = 0.0001, beta = 3):
 		"""
 		initialize default ae params
 		"""
-		self.vSize = vSize		# number of input units 
-		self.hSize = hSize		# number of hidden units 
-		self.sparsityParam = sparsityParam	# desired average activation of the hidden units.
+		self.vSide = vSide					# square root of number of hidden units, to be used for visualization
+		self.hSide = hSide					# square root of number of visible units, to be used for visualization
+		self.vSize = vSide ** 2				# number of input units 
+		self.hSize = hSide ** 2				# number of hidden units 
+		self.sparsityParam = sparsityParam	# average activation of the hidden units
 		self.lam = lam						# weight decay parameter       
 		self.beta = beta					# weight of sparsity penalty term       
 
 
-	def initNParams(self):
-		"""
-		initalize more params
-		"""
 		self.r = np.sqrt(6) / np.sqrt(self.hSize + self.vSize + 1)
 
 		# random assignment
@@ -36,8 +34,6 @@ class sparseae(object):
 		# self.W1 = np.ones((self.hSize, self.vSize)) * 2 * self.r - self.r
 		# self.W2 = np.ones((self.vSize, self.hSize)) * 2 * self.r - self.r
 
-
-
 		self.b1 = np.zeros([self.hSize,1])
 		self.b2 = np.zeros([self.vSize,1])
 
@@ -46,23 +42,11 @@ class sparseae(object):
 
 	def train(self,patches):
 		"""
-		train the ae
+		train the network
 		"""
 
-		max_iterations = 40
-
-		# opt_solution = scipy.optimize.minimize(self.computeCost, self.theta, 
-		# 		args = (patches,), method = 'L-BFGS-B',jac = True, options = {'maxiter': max_iterations})
-
-		# opt_theta = opt_solution.x
-		# opt_W1 = opt_theta[encoder.limit0 : encoder.limit1].reshape(hidden_size, visible_size)
-
-		# nn_params, cost, _, _, _ = op.fmin_cg(lambda t: self.computeCost(t,patches),self.theta, gtol = 0.001, maxiter = 40, full_output=1)
-
 		x,f,d = op.fmin_l_bfgs_b(lambda t: self.computeCost(t,patches), x0 = self.theta, pgtol = 0.00001, disp=1)
-		# print x.shape
-		# print f
-		# print d['grad'].shape
+
 		W1 = x[: self.hSize*self.vSize].reshape(self.hSize, self.vSize)
 
 		return W1
@@ -72,21 +56,23 @@ class sparseae(object):
 		"""
 		compute cost of single pass
 		"""
+
+		# unroll theta array
 		W1 = theta[0:self.hSize*self.vSize].reshape(self.hSize,self.vSize)
 		W2 = theta[self.hSize*self.vSize:2*self.hSize*self.vSize].reshape(self.vSize,self.hSize)
 		b1 = theta[2*self.hSize*self.vSize:2*self.hSize*self.vSize+self.hSize].reshape(self.hSize,1)
 		b2 = theta[2*self.hSize*self.vSize+self.hSize:].reshape(self.vSize,1)
 
+		# initialize placeholders
 		cost = 0
-
 		W1grad = np.zeros(W1.shape)
 		W2grad = np.zeros(W2.shape)
 		b1grad = np.zeros(b1.shape)
 		b2grad = np.zeros(b2.shape)
 
+
+		# forward pass
 		m = data.shape[1]
-
-
 
 		z_2 = np.dot(W1,data) + b1
 		a_2 = self.__sigmoid(z_2)
@@ -104,9 +90,9 @@ class sparseae(object):
 
 		reg = sum(W1.flatten() ** 2) + sum(W2.flatten() ** 2)*1.0
 
-
 		cost = J_simple + self.beta * sparse_penalty + self.lam * reg/2
 
+		# backprop
 		delta_3 = diff * (a_3 * (1 - a_3))
 
 		d2_simple = np.dot(np.transpose(W2),delta_3)
@@ -115,18 +101,16 @@ class sparseae(object):
 
 		d2_pen = d2_pen.reshape(d2_pen.shape[0],1)
 
-		delta_2 = (d2_simple + self.beta * d2_pen ) * a_2 * (1-a_2)
+		delta_2 = (d2_simple + self.beta * d2_pen) * a_2 * (1-a_2)
 
 
+		# get weights and biases
 		b2grad = 1.0*np.sum(delta_3,1)/m
 		b1grad = 1.0*np.sum(delta_2,1)/m
-
-
 		W2grad = np.dot(delta_3,1.0*np.transpose(a_2)/m) + self.lam * W2
-
 		W1grad = np.dot(delta_2,1.0*np.transpose(data)/m) + self.lam * W1
 
-
+		# roll up parameters into one array
 		grad = np.hstack((W1grad.flatten(),W2grad.flatten(),b1grad.flatten(),b2grad.flatten()))
 
 		return cost,grad
@@ -136,7 +120,6 @@ class sparseae(object):
 		return 1.0 / (1.0 + np.exp(-z))
 
 	def __kl(self,r,rh):
-
 		return np.sum(r * np.log(r*1.0/rh) + (1-r) * np.log((1-r)*1.0/(1-rh)))
 
 	def __klDelta(self,r,rh):
