@@ -62,6 +62,62 @@ def display_network(arr,numtoshow=64,patchsize=8):
 
 	plt.show()
 
+def computeNumericalGradient(J,theta):
+
+	numgrad = np.zeros(theta.shape)
+
+
+	eps = 1e-4
+	n = numgrad.shape[0]
+	i = np.eye(n,n)
+
+	for k in xrange(numgrad.shape[0]):
+		eps_vec = i[:,k] * eps
+		eps_vec = eps_vec.reshape(eps_vec.shape[0],1)
+
+		val = (J(theta+eps_vec)[0] - J(theta-eps_vec)[0]) * 1.0 / (2*eps)
+
+		# print 'val:'
+		# print val
+		# print '---'
+		numgrad[k] = val
+
+	return numgrad
+
+def simpleQuadraticFunction(x):
+
+	value = x[0]**2 + 3*x[0]*x[1]
+	grad = np.zeros((2,1))
+	grad[0] = 2*x[0] + 3*x[1]
+	grad[1] = 3*x[0]
+
+	return value,grad
+
+def checkNumericalGradient():
+	x = np.array([[4],[10]])
+	value,grad = simpleQuadraticFunction(x)
+
+	numgrad = computeNumericalGradient(simpleQuadraticFunction, x);
+
+	print 'sizes: numgrad, grad:', numgrad.shape, grad.shape
+
+	print np.hstack((numgrad,grad))
+
+	diff = np.abs(numgrad-grad)/np.abs(numgrad+grad);
+	print 'Norm of the difference between numerical and analytical gradient'
+	print '(should be < 1e-9):'
+	print diff
+
+
+
+
+
+
+
+
+
+
+
 
 
 # s = sparseae() #initialize with default settings
@@ -76,6 +132,11 @@ patches = normalize_data(patches)
 # display_network(a)
 
 s = sparseae() #initialize with default settings
+
+
 s.initNParams()
 
 s.train(patches)
+
+checkNumericalGradient()
+
