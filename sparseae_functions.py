@@ -133,18 +133,17 @@ def checkNumericalGradient():
 
 # Demonstration
 
-patches = sample_images()
-patches = normalize_data(patches)
+# patches = sample_images()
+# patches = normalize_data(patches)
 
-# display_network(patches)
+# # display_network(patches)
 
-# sae = sparseae() #initialize autoencoder with default settings
+# # sae = sparseae() #initialize autoencoder with default settings
+# sae = sparseae(hSide = 6) #initialize autoencoder with 36 hidden units
 
-sae = sparseae(hSide = 6) #initialize autoencoder with 36 hidden units
+# weights = sae.train(patches) #train the network
 
-weights = sae.train(patches) #train the network
-
-display_weights(arr = weights, vSide = sae.vSide, hSide = sae.hSide)
+# display_weights(arr = weights, vSide = sae.vSide, hSide = sae.hSide)
 
 
 
