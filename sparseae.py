@@ -27,19 +27,27 @@ class sparseae(object):
 		"""
 		self.r = np.sqrt(6) / np.sqrt(self.hSize + self.vSize + 1)
 
+		# random assignment
 		self.W1 = np.random.rand(self.hSize, self.vSize) * 2 * self.r - self.r
 		self.W2 = np.random.rand(self.vSize, self.hSize) * 2 * self.r - self.r
+
+		#non-random assignment
+		# self.W1 = np.ones((self.hSize, self.vSize)) * 2 * self.r - self.r
+		# self.W2 = np.ones((self.vSize, self.hSize)) * 2 * self.r - self.r
+
+
 
 		self.b1 = np.zeros([self.hSize,1])
 		self.b2 = np.zeros([self.vSize,1])
 
 		self.theta = np.hstack((self.W1.flatten(),self.W2.flatten(),self.b1.flatten(),self.b2.flatten()))
 
+
 	def train(self,patches):
 		"""
 		train the ae
 		"""
-		self.computeCost(self.theta,patches)
+		cost,grad = self.computeCost(self.theta,patches)
 
 	def computeCost(self,theta,data):
 		"""
@@ -50,8 +58,6 @@ class sparseae(object):
 		b1 = theta[2*self.hSize*self.vSize:2*self.hSize*self.vSize+self.hSize].reshape(self.hSize,1)
 		b2 = theta[2*self.hSize*self.vSize+self.hSize:].reshape(self.vSize,1)
 
-		# print W1.shape, W2.shape, b1.shape, b2.shape
-
 		cost = 0
 
 		W1grad = np.zeros(W1.shape)
@@ -61,9 +67,7 @@ class sparseae(object):
 
 		m = data.shape[1]
 
-		# print data.shape
-		# print W1.shape
-		# print b1.shape
+
 
 		z_2 = np.dot(W1,data) + b1
 		a_2 = self.__sigmoid(z_2)
@@ -84,9 +88,29 @@ class sparseae(object):
 
 		cost = J_simple + self.beta * sparse_penalty + self.lam * reg/2
 
-		print cost
+		delta_3 = diff * (a_3 * (1 - a_3))
+
+		d2_simple = np.dot(np.transpose(W2),delta_3)
+		
+		d2_pen = self.__klDelta(self.sparsityParam,rho_hat)
+
+		d2_pen = d2_pen.reshape(d2_pen.shape[0],1)
+
+		delta_2 = (d2_simple + self.beta * d2_pen ) * a_2 * (1-a_2)
 
 
+		b2grad = 1.0*np.sum(delta_3,1)/m
+		b1grad = 1.0*np.sum(delta_2,1)/m
+
+
+		W2grad = np.dot(delta_3,1.0*np.transpose(a_2)/m) + self.lam * W2
+
+		W1grad = np.dot(delta_2,1.0*np.transpose(data)/m) + self.lam * W1
+
+
+		grad = np.hstack((W1grad.flatten(),W2grad.flatten(),b1grad.flatten(),b2grad.flatten()))
+
+		return cost,grad
 
 
 	def __sigmoid(self,z):
@@ -94,11 +118,8 @@ class sparseae(object):
 
 	def __kl(self,r,rh):
 
-		return np.sum(r * np.log(r*1.0/rh) + (1-r) * np.log((1-r)/(1-rh)))
+		return np.sum(r * np.log(r*1.0/rh) + (1-r) * np.log((1-r)*1.0/(1-rh)))
 
+	def __klDelta(self,r,rh):
+		return -1.0*r/rh + (1-r)*1.0/(1-rh)
 
-
-
-# function ans = kl(r, rh)
-#   ans = sum(r .* log(r ./ rh) + (1-r) .* log( (1-r) ./ (1-rh)));
-# end
