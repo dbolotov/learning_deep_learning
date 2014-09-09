@@ -1,3 +1,12 @@
+#!/usr/bin/python
+
+"""
+sparseae_functions.py
+
+Functions to load, normalize and display data, and to check the gradient implementation
+"""
+
+
 from sparseae import *
 import scipy.io
 import numpy as np
@@ -120,6 +129,7 @@ def computeNumericalGradient(J,theta):
 	i = np.eye(n,n)
 
 	for k in xrange(numgrad.shape[0]):
+		print numgrad.shape[0], k
 		eps_vec = i[:,k] * eps
 
 		val = (J(theta+eps_vec)[0] - J(theta-eps_vec)[0]) * 1.0 / (2*eps)
@@ -153,34 +163,36 @@ def checkNumericalGradient():
 	print diff
 
 
-# Demonstration
+"""
+Demo:
+Uncomment the following 5 lines to instantiate an autoencoder and train it from this .py file
+"""
 
 # patches = sample_images()
 # patches = normalize_data(patches)
-
-# # display_network(patches)
-
-# # sae = sparseae() #initialize autoencoder with default settings
-# sae = sparseae(hSide = 6) #initialize autoencoder with 36 hidden units
-
+# sae = sparseae() #initialize autoencoder with default settings
 # weights = sae.train(patches) #train the network
-
 # display_weights(arr = weights, vSide = sae.vSide, hSide = sae.hSide)
 
 
+"""
+Check gradient calculation:
+Uncomment the following code to check the gradient implementation against a numerical computation.
+"""
+# patches = sample_images(numpatches=100,patchsize=8)
+# patches = normalize_data(patches)
+# sae = sparseae(hSide=2)
+# [cost,grad] = sae.computeCost(sae.theta,patches)
 
-
-# print 'check cost calculation against numerical gradient'
-# [cost,grad] = s.computeCost(s.theta,patches)
-
-# numgrad = computeNumericalGradient(lambda x: s.computeCost(x,patches),s.theta)
+# numgrad = computeNumericalGradient(lambda x: sae.computeCost(x,patches),sae.theta) # numerical gradient
 
 # diff = np.abs(numgrad-grad) / np.abs(numgrad+grad)
 
-# print 'these value should be less than 1e-9:'
+# print 'these value should be very small (within a few magnitudes of 1e-9):'
 # print 'max:',np.max(diff)
 # print 'min:',np.min(diff)
 
-# # print np.hstack((numgrad,grad))
+# print 'the following two columns should be very similar'
+# print np.transpose(np.vstack((numgrad,grad)))
 
 
