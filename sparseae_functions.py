@@ -3,6 +3,32 @@ import scipy.io
 import numpy as np
 import matplotlib.pyplot as plt
 
+def show_full_images(nrows=2,ncols=2):
+	"""
+	show full-size images
+	"""
+	img_dict = scipy.io.loadmat('data/IMAGES.mat')
+
+	images = img_dict['IMAGES']
+
+	imageside = images.shape[0]
+	imagecount = images.shape[2]
+
+	f,axes = plt.subplots(nrows=nrows,ncols=ncols)
+
+	i = 0
+	for axis in axes.flat:
+		img = axis.imshow(images[:,:,i],cmap = plt.cm.gray, interpolation = 'nearest')
+
+		axis.set_frame_on(False)
+		axis.set_axis_off()
+		i += 1
+
+	plt.show()
+
+
+
+
 def sample_images(numpatches=10000,patchsize=8):
 	"""
 	sample random patches from .mat file
@@ -50,15 +76,12 @@ def normalize_data(patches):
 
 	return patches
 
-def display_network(arr,numtoshow=64,patchsize=8):
+def display_network(arr,patchsize=8,nrows=2,ncols=2):
 	"""
 	display some patches
 	"""
 
-	numtoshow = np.minimum(64,numtoshow)
-	plotsize = np.sqrt(numtoshow).astype(int)
-
-	f,axes = plt.subplots(nrows=plotsize,ncols=plotsize)
+	f,axes = plt.subplots(nrows=nrows,ncols=ncols)
 
 	i = 0
 	for axis in axes.flat:
@@ -72,11 +95,11 @@ def display_network(arr,numtoshow=64,patchsize=8):
 	plt.show()
 
 
-def display_weights(arr, vSide=8, hSide=5):
+def display_weights(arr, nrows=5, ncols=5, vSide=8):
 	"""
 	display the trained weights
 	"""
-	figure, axes = plt.subplots(nrows = hSide, ncols = hSide)
+	figure, axes = plt.subplots(nrows = nrows, ncols = ncols)
 	i = 0
 
 	for axis in axes.flat:
@@ -128,7 +151,6 @@ def checkNumericalGradient():
 	print 'Norm of the difference between numerical and analytical gradient'
 	print '(should be < 1e-9):'
 	print diff
-
 
 
 # Demonstration
