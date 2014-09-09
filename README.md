@@ -17,5 +17,4 @@ References
 
 TODO:
 - clean up and comment code
-- finish ipython notebook demo
 
